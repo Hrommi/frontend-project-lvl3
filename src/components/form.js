@@ -58,12 +58,16 @@ export default () => {
   hintElement.classList.add('text-muted', 'my-1');
   hintElement.textContent = 'Example: https://ru.hexlet.io/lessons.rss';
 
+  const feedbackElement = document.createElement('div');
+  feedbackElement.classList.add('feedback');
+
   jumbotronElement.appendChild(rowElement);
   rowElement.appendChild(colElement);
   colElement.appendChild(headerElement);
   colElement.appendChild(descriptionElement);
   colElement.appendChild(formElement);
   colElement.appendChild(hintElement);
+  colElement.appendChild(feedbackElement);
 
   return jumbotronElement;
 };
