@@ -1,6 +1,7 @@
 import * as yup from 'yup';
 import axios from 'axios';
 import uniqueId from 'lodash/uniqueId';
+import i18next from 'i18next';
 import watch from './watchers';
 import parse from './parser';
 import createForm from './components/form';
@@ -11,9 +12,9 @@ const urlSchema = yup.string().url().required();
 const validateUrl = (url, feeds) => {
   try {
     urlSchema.validateSync(url);
-    if (feeds.includes(url)) {
+    if (feeds.find((feed) => feed.url === url)) {
       return {
-        message: 'Rss already exists',
+        message: i18next.t('form.errors.exist'),
         type: 'global',
       };
     }

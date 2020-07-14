@@ -1,4 +1,5 @@
 import onChange from 'on-change';
+import i18next from 'i18next';
 
 export default (initialState, elements) => {
   const handleUrlInput = (state) => {
@@ -18,7 +19,7 @@ export default (initialState, elements) => {
         urlInput.value = '';
         submitButton.removeAttribute('disabled');
         feedback.classList.add('text-success');
-        feedback.textContent = 'Rss has been loaded';
+        feedback.textContent = i18next.t('form.success');
         break;
       }
       case 'loading': {

@@ -1,3 +1,5 @@
+import i18next from 'i18next';
+
 const createForm = () => {
   const formElement = document.createElement('form');
   formElement.classList.add('rss-form');
@@ -11,7 +13,7 @@ const createForm = () => {
   const inputElement = document.createElement('input');
   inputElement.classList.add('form-control', 'form-control-lg', 'w-100');
   inputElement.setAttribute('name', 'url');
-  inputElement.setAttribute('placeholder', 'RSS link');
+  inputElement.setAttribute('placeholder', i18next.t('form.placeholder'));
   inputElement.setAttribute('required', true);
 
   const colButtonElement = document.createElement('div');
@@ -46,17 +48,23 @@ export default () => {
 
   const headerElement = document.createElement('h1');
   headerElement.classList.add('display-3');
-  headerElement.textContent = 'RSS Reader';
+  headerElement.textContent = i18next.t('form.title');
 
   const descriptionElement = document.createElement('p');
   descriptionElement.classList.add('lead');
-  descriptionElement.textContent = 'Start reading RSS today! It is easy, it is nicely.';
+  descriptionElement.textContent = i18next.t('form.description');
 
   const formElement = createForm();
 
   const hintElement = document.createElement('p');
   hintElement.classList.add('text-muted', 'my-1');
-  hintElement.textContent = 'Example: https://ru.hexlet.io/lessons.rss';
+  hintElement.textContent = i18next.t(
+    'form.hint',
+    {
+      link: 'https://ru.hexlet.io/lessons.rss',
+      interpolation: { escapeValue: false },
+    },
+  );
 
   const feedbackElement = document.createElement('div');
   feedbackElement.classList.add('feedback');
