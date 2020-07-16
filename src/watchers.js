@@ -77,7 +77,8 @@ export default (initialState, elements) => {
         handleFeedback(initialState);
         break;
       }
-      case 'feeds': {
+      case 'feeds':
+      case 'posts': {
         handleFeeds(initialState);
         break;
       }

@@ -6,6 +6,7 @@ import watch from './watchers';
 import parse from './parser';
 
 const CORS_PROXY_URL = 'https://cors-anywhere.herokuapp.com';
+const FETCHING_TIMEOUT = 5000;
 
 const urlSchema = yup
   .string()
@@ -43,6 +44,30 @@ const handleUrlInput = (e, state) => {
   } else {
     form.valid = true;
   }
+};
+
+const fetchPosts = (state) => {
+  const { feeds, posts } = state;
+  const promises = feeds.map((feed) => (
+    axios.get(`${CORS_PROXY_URL}/${feed.url}`).then((response) => {
+      const parsedFeed = parse(response.data);
+      const newPosts = parsedFeed.items.map((item) => ({
+        ...item,
+        feedId: feed.id,
+      }));
+      const oldPostsLinks = new Set(
+        posts.filter((post) => post.feedId === feed.id).map((post) => post.link),
+      );
+      const differencePosts = newPosts.filter(
+        (newPost) => !oldPostsLinks.has(newPost.link),
+      );
+      posts.unshift(...differencePosts);
+    })
+  ));
+
+  Promise.all(promises).finally(() => {
+    setTimeout(() => fetchPosts(state), FETCHING_TIMEOUT);
+  });
 };
 
 const handleFormSubmit = (e, state) => {
@@ -119,4 +144,6 @@ export default () => {
   elements.form.addEventListener('submit', (e) => {
     handleFormSubmit(e, watchedState);
   });
+
+  setTimeout(() => fetchPosts(watchedState), FETCHING_TIMEOUT);
 };
