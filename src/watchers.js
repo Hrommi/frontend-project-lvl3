@@ -41,7 +41,7 @@ export default (initialState, elements) => {
         break;
       }
       default: {
-        break;
+        throw new Error(`Unknown form state: '${state.form.state}'!`);
       }
     }
   };
