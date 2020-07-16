@@ -7,6 +7,8 @@ export default {
       placeholder: 'RSS адрес',
       button: 'Добавить',
       errors: {
+        url: 'RSS адрес должен быть валидным URL',
+        required: 'RSS адрес должен быть заполнен',
         exist: 'Этот RSS адрес уже добавлен',
       },
       success: 'RSS загружен',

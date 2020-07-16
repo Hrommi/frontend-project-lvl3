@@ -1,37 +1,43 @@
 import onChange from 'on-change';
-import i18next from 'i18next';
+
+const feedbackTypesMapping = {
+  danger: 'text-danger',
+  success: 'text-success',
+};
 
 export default (initialState, elements) => {
   const handleUrlInput = (state) => {
-    if (state.form.url.valid) {
+    if (state.form.valid) {
       elements.urlInput.classList.remove('is-invalid');
-      elements.submitButton.removeAttribute('disabled');
     } else {
       elements.urlInput.classList.add('is-invalid');
-      elements.submitButton.setAttribute('disabled', true);
     }
   };
 
+  const handleFeedback = (state) => {
+    const { feedback } = elements;
+    feedback.classList.remove('text-success', 'text-danger');
+    feedback.classList.add(feedbackTypesMapping[state.form.feedback.type]);
+    feedback.textContent = state.form.feedback.value;
+  };
+
   const handleForm = (state) => {
-    const { urlInput, submitButton, feedback } = elements;
+    const { urlInput, submitButton, spinner } = elements;
     switch (state.form.state) {
       case 'filling': {
-        urlInput.value = '';
+        urlInput.value = state.form.url;
         submitButton.removeAttribute('disabled');
-        feedback.classList.add('text-success');
-        feedback.textContent = i18next.t('form.success');
+        spinner.classList.add('d-none');
         break;
       }
       case 'loading': {
         submitButton.setAttribute('disabled', true);
-        feedback.classList.remove('text-success', 'text-danger');
-        feedback.textContent = '';
+        spinner.classList.remove('d-none');
         break;
       }
       case 'failed': {
         submitButton.removeAttribute('disabled');
-        feedback.classList.add('text-danger');
-        feedback.textContent = state.form.error;
+        spinner.classList.add('d-none');
         break;
       }
       default: {
@@ -42,29 +48,33 @@ export default (initialState, elements) => {
 
   const handleFeeds = (state) => {
     const { feeds } = elements;
-    const html = state.feeds.map((feed) => {
-      const titleHtml = `<h2><a href="${feed.link}" target="_blank">${feed.title}</a></h2>`;
-      const descriptionHtml = `<p>${feed.description}</p>`;
-      const feedPosts = state.posts.filter((post) => post.feedId === feed.id);
-      const itemsHtml = feedPosts
-        .map((post) => (
-          `<div><a href="${post.link}">${post.title}</a></div>`
-        ))
-        .join('\n');
-      return `${titleHtml}\n${descriptionHtml}\n${itemsHtml}`;
-    });
+    const html = state.feeds
+      .map((feed) => {
+        const titleHtml = `<h2><a href='${feed.url}' target='_blank'>${feed.title}</a></h2>`;
+        const descriptionHtml = `<p>${feed.description}</p>`;
+        const feedPosts = state.posts.filter((post) => post.feedId === feed.id);
+        const itemsHtml = feedPosts
+          .map((post) => `<div><a href='${post.link}'>${post.title}</a></div>`)
+          .join('\n');
+        return `<div class="mb-4">${titleHtml}${descriptionHtml}${itemsHtml}</div>`;
+      })
+      .join('\n');
     feeds.innerHTML = html;
   };
 
   const watchedState = onChange(initialState, (path) => {
-    console.log(path);
     switch (path) {
-      case 'form.url.valid': {
+      case 'form.valid': {
         handleUrlInput(initialState);
         break;
       }
       case 'form.state': {
         handleForm(initialState);
+        break;
+      }
+      case 'form.feedback.value':
+      case 'form.feedback.type': {
+        handleFeedback(initialState);
         break;
       }
       case 'feeds': {

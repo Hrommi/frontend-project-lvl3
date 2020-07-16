@@ -4,43 +4,98 @@ import uniqueId from 'lodash/uniqueId';
 import i18next from 'i18next';
 import watch from './watchers';
 import parse from './parser';
-import createForm from './components/form';
-import createFeeds from './components/feeds';
 
-const urlSchema = yup.string().url().required();
+const CORS_PROXY_URL = 'https://cors-anywhere.herokuapp.com';
+
+const urlSchema = yup
+  .string()
+  .url(() => i18next.t('form.errors.url'))
+  .required(() => i18next.t('form.errors.required'));
 
 const validateUrl = (url, feeds) => {
   try {
     urlSchema.validateSync(url);
     if (feeds.find((feed) => feed.url === url)) {
-      return {
-        message: i18next.t('form.errors.exist'),
-        type: 'global',
-      };
+      throw new Error(i18next.t('form.errors.exist'));
     }
     return null;
   } catch (e) {
-    return {
-      message: e.message,
-      type: 'local',
-    };
+    return e.message;
+  }
+};
+
+const handleUrlInput = (e, state) => {
+  const {
+    target: { value },
+  } = e;
+  const { form, feeds } = state;
+  form.url = value;
+  form.feedback.value = null;
+
+  if (value === '') {
+    form.valid = true;
+    return;
+  }
+
+  const urlError = validateUrl(value, feeds);
+  if (urlError) {
+    form.valid = false;
+  } else {
+    form.valid = true;
+  }
+};
+
+const handleFormSubmit = (e, state) => {
+  e.preventDefault();
+  const { form, feeds, posts } = state;
+  form.state = 'loading';
+  const urlError = validateUrl(form.url, feeds);
+  if (!urlError) {
+    form.feedback.value = null;
+    axios
+      .get(`${CORS_PROXY_URL}/${form.url}`)
+      .then((response) => {
+        const feed = parse(response.data);
+        const feedId = uniqueId();
+        posts.push(
+          ...feed.items.map((item) => ({
+            ...item,
+            feedId,
+          })),
+        );
+        feeds.unshift({
+          id: feedId,
+          title: feed.title,
+          description: feed.description,
+          url: form.url,
+        });
+        form.url = '';
+        form.state = 'filling';
+        form.feedback.value = i18next.t('form.success');
+        form.feedback.type = 'success';
+      })
+      .catch((error) => {
+        form.state = 'failed';
+        form.feedback.value = error.message;
+        form.feedback.type = 'danger';
+      });
+  } else {
+    form.state = 'failed';
+    form.feedback.value = urlError;
+    form.feedback.type = 'danger';
   }
 };
 
 export default () => {
-  const rootElement = document.getElementById('point');
-  rootElement.appendChild(createForm());
-  rootElement.appendChild(createFeeds());
-
   const state = {
     form: {
       state: 'filling',
-      error: null,
-      url: {
-        value: '',
-        valid: true,
-      },
+      url: '',
       valid: true,
+      feedback: {
+        value: null,
+        type: 'danger',
+      },
     },
     feeds: [],
     posts: [],
@@ -50,6 +105,7 @@ export default () => {
     form: document.querySelector('.rss-form'),
     urlInput: document.querySelector('.rss-form [name="url"]'),
     submitButton: document.querySelector('.rss-form [type="submit"]'),
+    spinner: document.querySelector('.rss-form .spinner'),
     feedback: document.querySelector('.feedback'),
     feeds: document.querySelector('.feeds'),
   };
@@ -57,47 +113,10 @@ export default () => {
   const watchedState = watch(state, elements);
 
   elements.urlInput.addEventListener('input', (e) => {
-    const { target: { value } } = e;
-    watchedState.form.url.value = value;
-
-    if (value === '') {
-      watchedState.form.url.valid = true;
-      return;
-    }
-
-    const error = validateUrl(watchedState.form.url.value, watchedState.feeds);
-    if (error) {
-      watchedState.form.url.valid = false;
-    } else {
-      watchedState.form.url.valid = true;
-    }
+    handleUrlInput(e, watchedState);
   });
 
   elements.form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    watchedState.form.state = 'loading';
-    watchedState.form.error = null;
-    axios.get(`https://cors-anywhere.herokuapp.com/${watchedState.form.url.value}`)
-      .then((response) => {
-        const feed = parse(response.data);
-        const feedId = uniqueId();
-        watchedState.posts.push(...feed.items.map((item) => ({
-          ...item,
-          feedId,
-        })));
-        watchedState.feeds.unshift({
-          id: feedId,
-          title: feed.title,
-          description: feed.description,
-          url: watchedState.form.url.value,
-        });
-        watchedState.form.url.value = '';
-        watchedState.form.state = 'filling';
-        watchedState.form.error = null;
-      })
-      .catch((error) => {
-        watchedState.form.state = 'failed';
-        watchedState.form.error = error.message;
-      });
+    handleFormSubmit(e, watchedState);
   });
 };
