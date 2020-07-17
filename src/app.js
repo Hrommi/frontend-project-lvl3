@@ -172,7 +172,6 @@ export default () => {
   elements.languageButtons.forEach((button) => {
     button.addEventListener('click', (e) => {
       handleLanguageChange(e, watchedState);
-      // console.log(e.target.dataset.language);
     });
   });
 
