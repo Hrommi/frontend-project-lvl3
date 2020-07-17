@@ -8,16 +8,24 @@ import parse from './parser';
 const CORS_PROXY_URL = 'https://cors-anywhere.herokuapp.com';
 const FETCHING_TIMEOUT = 5000;
 
+const feedbackMessages = {
+  empty: () => '',
+  url: () => i18next.t('form.errors.url'),
+  required: () => i18next.t('form.errors.required'),
+  exist: () => i18next.t('form.errors.exist'),
+  success: () => i18next.t('form.success'),
+};
+
 const urlSchema = yup
   .string()
-  .url(() => i18next.t('form.errors.url'))
-  .required(() => i18next.t('form.errors.required'));
+  .url(() => feedbackMessages.url)
+  .required(() => feedbackMessages.required);
 
 const validateUrl = (url, feeds) => {
   try {
     urlSchema.validateSync(url);
     if (feeds.find((feed) => feed.url === url)) {
-      throw new Error(i18next.t('form.errors.exist'));
+      return feedbackMessages.exist;
     }
     return null;
   } catch (e) {
@@ -31,7 +39,7 @@ const handleUrlInput = (e, state) => {
   } = e;
   const { form, feeds } = state;
   form.url = value;
-  form.feedback.value = null;
+  form.feedback.type = feedbackMessages.empty;
 
   if (value === '') {
     form.valid = true;
@@ -76,7 +84,7 @@ const handleFormSubmit = (e, state) => {
   form.state = 'loading';
   const urlError = validateUrl(form.url, feeds);
   if (!urlError) {
-    form.feedback.value = null;
+    form.feedback.type = feedbackMessages.empty;
     axios
       .get(`${CORS_PROXY_URL}/${form.url}`)
       .then((response) => {
@@ -96,19 +104,28 @@ const handleFormSubmit = (e, state) => {
         });
         form.url = '';
         form.state = 'filling';
-        form.feedback.value = i18next.t('form.success');
-        form.feedback.type = 'success';
+        form.feedback.type = feedbackMessages.success;
+        form.feedback.status = 'success';
       })
       .catch((error) => {
         form.state = 'failed';
-        form.feedback.value = error.message;
-        form.feedback.type = 'danger';
+        form.feedback.type = error.message;
+        form.feedback.status = 'danger';
       });
   } else {
     form.state = 'failed';
-    form.feedback.value = urlError;
-    form.feedback.type = 'danger';
+    form.feedback.type = urlError;
+    form.feedback.status = 'danger';
   }
+};
+
+const handleLanguageChange = (e, state) => {
+  const newLanguage = e.target.dataset.language;
+  if (newLanguage === state.language) {
+    return;
+  }
+  const { language } = state;
+  language.value = newLanguage;
 };
 
 export default () => {
@@ -118,12 +135,15 @@ export default () => {
       url: '',
       valid: true,
       feedback: {
-        value: null,
-        type: 'danger',
+        type: feedbackMessages.empty,
+        status: 'danger',
       },
     },
     feeds: [],
     posts: [],
+    language: {
+      value: 'en',
+    },
   };
 
   const elements = {
@@ -133,6 +153,10 @@ export default () => {
     spinner: document.querySelector('.rss-form .spinner'),
     feedback: document.querySelector('.feedback'),
     feeds: document.querySelector('.feeds'),
+    languageButtons: document.querySelectorAll('[data-language]'),
+    title: document.querySelector('.title'),
+    description: document.querySelector('.description'),
+    hint: document.querySelector('.hint'),
   };
 
   const watchedState = watch(state, elements);
@@ -143,6 +167,13 @@ export default () => {
 
   elements.form.addEventListener('submit', (e) => {
     handleFormSubmit(e, watchedState);
+  });
+
+  elements.languageButtons.forEach((button) => {
+    button.addEventListener('click', (e) => {
+      handleLanguageChange(e, watchedState);
+      // console.log(e.target.dataset.language);
+    });
   });
 
   setTimeout(() => fetchPosts(watchedState), FETCHING_TIMEOUT);
