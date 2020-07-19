@@ -1,0 +1,146 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app should render feed 1`] = `
+<div
+  class="col-md-10 col-lg-8 mx-auto feeds"
+>
+  <div
+    class="mb-4"
+  >
+    <h2>
+      <a
+        href="http://localhost.com/feed.rss"
+        target="_blank"
+      >
+        RSS Title
+      </a>
+    </h2>
+    <p>
+      RSS Description
+    </p>
+    <div>
+      <a
+        href="https://rss.com/1"
+      >
+        Title 1
+      </a>
+    </div>
+    
+
+    <div>
+      <a
+        href="https://rss.com/2"
+      >
+        Title 2
+      </a>
+    </div>
+    
+
+    <div>
+      <a
+        href="https://rss.com/3"
+      >
+        Title 3
+      </a>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`app should render two feeds 1`] = `
+<div
+  class="col-md-10 col-lg-8 mx-auto feeds"
+>
+  <div
+    class="mb-4"
+  >
+    <h2>
+      <a
+        href="http://localhost.com/updated-feed.rss"
+        target="_blank"
+      >
+        RSS Title
+      </a>
+    </h2>
+    <p>
+      RSS Description
+    </p>
+    <div>
+      <a
+        href="https://rss.com/0"
+      >
+        Title 0
+      </a>
+    </div>
+    
+
+    <div>
+      <a
+        href="https://rss.com/1"
+      >
+        Title 1
+      </a>
+    </div>
+    
+
+    <div>
+      <a
+        href="https://rss.com/2"
+      >
+        Title 2
+      </a>
+    </div>
+    
+
+    <div>
+      <a
+        href="https://rss.com/3"
+      >
+        Title 3
+      </a>
+    </div>
+  </div>
+  
+
+  <div
+    class="mb-4"
+  >
+    <h2>
+      <a
+        href="http://localhost.com/feed.rss"
+        target="_blank"
+      >
+        RSS Title
+      </a>
+    </h2>
+    <p>
+      RSS Description
+    </p>
+    <div>
+      <a
+        href="https://rss.com/1"
+      >
+        Title 1
+      </a>
+    </div>
+    
+
+    <div>
+      <a
+        href="https://rss.com/2"
+      >
+        Title 2
+      </a>
+    </div>
+    
+
+    <div>
+      <a
+        href="https://rss.com/3"
+      >
+        Title 3
+      </a>
+    </div>
+  </div>
+</div>
+`;

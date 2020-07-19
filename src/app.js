@@ -6,7 +6,7 @@ import { en, ru } from './locales';
 import watch from './watchers';
 import parse from './parser';
 
-const CORS_PROXY_URL = 'https://cors-anywhere.herokuapp.com';
+export const CORS_PROXY_URL = 'https://cors-anywhere.herokuapp.com';
 const FETCHING_TIMEOUT = 5000;
 
 const feedbackMessages = {
