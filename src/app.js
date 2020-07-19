@@ -2,6 +2,7 @@ import * as yup from 'yup';
 import axios from 'axios';
 import uniqueId from 'lodash/uniqueId';
 import i18next from 'i18next';
+import { en, ru } from './locales';
 import watch from './watchers';
 import parse from './parser';
 
@@ -159,21 +160,31 @@ export default () => {
     hint: document.querySelector('.hint'),
   };
 
-  const watchedState = watch(state, elements);
+  i18next
+    .init({
+      lng: 'en',
+      resources: {
+        en,
+        ru,
+      },
+    })
+    .then(() => {
+      const watchedState = watch(state, elements);
 
-  elements.urlInput.addEventListener('input', (e) => {
-    handleUrlInput(e, watchedState);
-  });
+      elements.urlInput.addEventListener('input', (e) => {
+        handleUrlInput(e, watchedState);
+      });
 
-  elements.form.addEventListener('submit', (e) => {
-    handleFormSubmit(e, watchedState);
-  });
+      elements.form.addEventListener('submit', (e) => {
+        handleFormSubmit(e, watchedState);
+      });
 
-  elements.languageButtons.forEach((button) => {
-    button.addEventListener('click', (e) => {
-      handleLanguageChange(e, watchedState);
+      elements.languageButtons.forEach((button) => {
+        button.addEventListener('click', (e) => {
+          handleLanguageChange(e, watchedState);
+        });
+      });
+
+      setTimeout(() => fetchPosts(watchedState), FETCHING_TIMEOUT);
     });
-  });
-
-  setTimeout(() => fetchPosts(watchedState), FETCHING_TIMEOUT);
 };
