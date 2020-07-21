@@ -18,17 +18,15 @@ const feedbackMessages = {
   success: () => i18next.t('form.success'),
 };
 
-const urlSchema = yup
-  .string()
-  .url(() => feedbackMessages.url)
-  .required(() => feedbackMessages.required);
-
 const validateUrl = (url, feeds) => {
+  const urls = feeds.map((feed) => feed.url);
+  const urlSchema = yup
+    .string()
+    .url(() => feedbackMessages.url)
+    .notOneOf(urls, () => feedbackMessages.exist)
+    .required(() => feedbackMessages.required);
   try {
     urlSchema.validateSync(url);
-    if (feeds.find((feed) => feed.url === url)) {
-      return feedbackMessages.exist;
-    }
     return null;
   } catch (e) {
     return e.message;
