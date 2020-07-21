@@ -6,10 +6,6 @@ const feedbackTypesMapping = {
   success: 'text-success',
 };
 
-const getFeedback = (feedback) => (
-  typeof feedback === 'function' ? feedback() : feedback
-);
-
 export default (initialState, elements) => {
   const handleUrlInput = (state) => {
     if (state.form.valid) {
@@ -23,7 +19,7 @@ export default (initialState, elements) => {
     const { feedback } = elements;
     feedback.classList.remove('text-success', 'text-danger');
     feedback.classList.add(feedbackTypesMapping[state.form.feedback.status]);
-    feedback.textContent = getFeedback(state.form.feedback.type);
+    feedback.textContent = i18next.t(state.form.feedback.type);
   };
 
   const handleForm = (state) => {
@@ -98,7 +94,7 @@ export default (initialState, elements) => {
             interpolation: { escapeValue: false },
           },
         );
-        feedback.textContent = getFeedback(state.form.feedback.type);
+        feedback.textContent = i18next.t(state.form.feedback.type);
       });
   };
 

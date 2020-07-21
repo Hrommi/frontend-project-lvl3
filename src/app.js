@@ -11,20 +11,20 @@ export const CORS_PROXY_URL = 'https://cors-anywhere.herokuapp.com';
 const FETCHING_TIMEOUT = 5000;
 
 const feedbackMessages = {
-  empty: () => '',
-  url: () => i18next.t('form.errors.url'),
-  required: () => i18next.t('form.errors.required'),
-  exist: () => i18next.t('form.errors.exist'),
-  success: () => i18next.t('form.success'),
+  empty: null,
+  url: 'form.errors.url',
+  required: 'form.errors.required',
+  exist: 'form.errors.exist',
+  success: 'form.success',
 };
 
 const validateUrl = (url, feeds) => {
   const urls = feeds.map((feed) => feed.url);
   const urlSchema = yup
     .string()
-    .url(() => feedbackMessages.url)
-    .notOneOf(urls, () => feedbackMessages.exist)
-    .required(() => feedbackMessages.required);
+    .url(feedbackMessages.url)
+    .notOneOf(urls, feedbackMessages.exist)
+    .required(feedbackMessages.required);
   try {
     urlSchema.validateSync(url);
     return null;
