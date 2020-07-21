@@ -1,6 +1,7 @@
 import * as yup from 'yup';
 import axios from 'axios';
 import uniqueId from 'lodash/uniqueId';
+import differenceWith from 'lodash/differenceWith';
 import i18next from 'i18next';
 import { en, ru } from './locales';
 import watch from './watchers';
@@ -64,11 +65,11 @@ const fetchPosts = (state) => {
         ...item,
         feedId: feed.id,
       }));
-      const oldPostsLinks = new Set(
-        posts.filter((post) => post.feedId === feed.id).map((post) => post.link),
-      );
-      const differencePosts = newPosts.filter(
-        (newPost) => !oldPostsLinks.has(newPost.link),
+      const oldPosts = posts.filter((post) => post.feedId === feed.id);
+      const differencePosts = differenceWith(
+        newPosts,
+        oldPosts,
+        (post1, post2) => post1.link === post2.link,
       );
       posts.unshift(...differencePosts);
     })
